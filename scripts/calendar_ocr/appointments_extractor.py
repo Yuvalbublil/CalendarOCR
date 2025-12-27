@@ -70,7 +70,7 @@ class AppointmentsExtractor:
             if b[2] * b[3] > MAX_BOX_AREA:
                 boxes.remove(b)
 
-        logging.getLogger(__name__).info(f"Boxes before merge: {boxes}")
+        logging.getLogger(__name__).debug(f"Boxes before merge: {boxes}")
 
         def iou(b1, b2):
             x1, y1, w1, h1 = b1
@@ -93,15 +93,13 @@ class AppointmentsExtractor:
 
         merged.sort(key=lambda b: b[1])
 
-        logging.getLogger(__name__).info(f"Boxes after merge: {merged}")
+        logging.getLogger(__name__).debug(f"Boxes after merge: {merged}")
 
         return merged
 
     @staticmethod
     def extract_appointments(
         image_path: Path,
-        verbose: bool = False,
-        debug_dir: Optional[Path] = None,
         roi: Optional[Tuple[int, int, int, int]] = None,
     ) -> Tuple[List[RelativeAppointment], any]:
         appointments_ocr = ocr.OCR()
@@ -114,12 +112,9 @@ class AppointmentsExtractor:
             cv_img = cv_img[ry: ry + rh, rx: rx + rw]
             offset_x, offset_y = rx, ry
 
-        boxes = AppointmentsExtractor._find_text_boxes(
-            cv_img, debug_dir if verbose else None
-        )
-        print(boxes)
+        boxes = AppointmentsExtractor._find_text_boxes(cv_img)
 
-        logging.getLogger(__name__).info(f"Detected boxes: {boxes}")
+        logging.getLogger(__name__).debug(f"Detected boxes: {boxes}")
 
         appointments: List[RelativeAppointment] = []
         for box in boxes:
@@ -135,4 +130,5 @@ class AppointmentsExtractor:
                 RelativeAppointment(title=' '.join(text[::].split()),
                                     color=color, bbox=(gx, gy, gw, gh))
             )
+
         return appointments

@@ -4,15 +4,15 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 
-from appointment import RelativeAppointment
+from appointment import RelativeAppointment, Appointment
 
 
 def round(value: float, round_base: int):
     return np.round(value/round_base) * round_base
 
 
-def add_time(roi_config: dict, time_config: dict, base_day: datetime.datetime, appt: RelativeAppointment):
-    print(f"appt.bbox {appt.bbox}")
+def add_time(roi_config: dict, time_config: dict, base_day: datetime.datetime, appt: RelativeAppointment) -> Appointment:
+    logging.getLogger(__name__).debug(f"appt.bbox {appt.bbox}")
     start_y, block_size = appt.bbox[1], appt.bbox[3]
     start_y_in_roi = start_y - roi_config[1]
     start_time_hour = start_y_in_roi / \
@@ -22,9 +22,15 @@ def add_time(roi_config: dict, time_config: dict, base_day: datetime.datetime, a
 
     logging.getLogger(__name__).debug(
         f"{appt.title} , {start_time_hour}, {block_size_hour}")
-    appt.start_time = base_day + datetime.timedelta(hours=start_time_hour)
-    appt.duration = datetime.timedelta(hours=block_size_hour)
-    return appt
+
+    start_time = base_day + datetime.timedelta(hours=start_time_hour)
+    duration = datetime.timedelta(hours=block_size_hour)
+
+    return Appointment(title=appt.title,
+                       color=appt.color,
+                       start_time=start_time,
+                       duration=duration
+                       )
 
 
 def get_today_datetime() -> datetime.datetime:

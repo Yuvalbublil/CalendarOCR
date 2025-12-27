@@ -1,0 +1,70 @@
+import time_utils
+import logging
+import yaml
+
+from dataclasses import asdict
+from pathlib import Path
+from typing import Optional, List, Dict, Any
+
+from google_calendar import GoogleCalendar
+from appointment import RelativeAppointment, Appointment
+from appointments_extractor import AppointmentsExtractor
+
+CONFIG_DEFAULT = {}
+
+
+def _load_config(config_path: Optional[Path]) -> Dict[str, Any]:
+    if not config_path:
+        return CONFIG_DEFAULT
+    if yaml is None:
+        raise RuntimeError(
+            "PyYAML is required to use a config file. Install pyyaml.")
+    if not config_path.exists():
+        raise RuntimeError(f"Config file not found: {config_path}")
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    if not isinstance(data, dict):
+        raise RuntimeError("Config must be a YAML mapping")
+    return data
+
+
+def read_roi(config):
+    roi = tuple(config.get("roi", [])) if isinstance(
+        config.get("roi"), list) else None
+
+    if roi and len(roi) != 4:
+        msg = f"Invalid roi in config; expected [x, y, w, h] Got {roi}"
+        logging.getLogger(__name__).exception(msg)
+        raise ValueError(msg)
+
+    roi_int = tuple(int(v) for v in roi) if roi else None
+    return roi_int
+
+
+class CalendarOCR:
+    def __init__(self, config_path: Optional[Path] = None, google_calendar: GoogleCalendar = None):
+        config = _load_config(config_path)
+        self._roi = read_roi(config)
+        self._time_config = config.get("time", {})
+        self._appointments_extractor = AppointmentsExtractor()
+        self._google_calendar = google_calendar
+
+    def process_image(self, image_path: Path) -> List[RelativeAppointment]:
+        ocr_appts = self._appointments_extractor.extract_appointments(
+            image_path,
+            roi=self._roi)
+
+        appts: List[Appointment] = []
+        for appt in ocr_appts:
+            appts.append(time_utils.add_time(
+                self._roi, self._time_config, time_utils.get_today_datetime(), appt))  # TODO change today to the correct day
+
+        for appt in appts:
+            logging.getLogger(__name__).debug(
+                asdict(appt) | {"color_hex": appt.to_hex()})
+
+        if self._google_calendar:
+            for appt in appts:
+                self._google_calendar.add_appointment(appt)
+
+        return appts

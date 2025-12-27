@@ -137,6 +137,6 @@ class OCR:
         variants.append(to_pil(adaptive))
         variants.append(to_pil(255 - adaptive))
 
-        logging.getLogger(__name__).info(box)
+        logging.getLogger(__name__).debug(box)
 
         return OCR._get_ocr_best_candidate(variants, OCR.TESSERACT_CONFIGS)
