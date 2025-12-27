@@ -23,8 +23,8 @@ STRIP_SIDE_PIXELS = 50
 
 class AppointmentsExtractor:
 
-    def __init__(self):
-        pass
+    def __init__(self, roi: Optional[Tuple[int, int, int, int]] = None):
+        self._roi = roi
 
     @staticmethod
     def _dominant_color_near_line(cv_img, box) -> Tuple[int, int, int]:
@@ -99,15 +99,14 @@ class AppointmentsExtractor:
 
     @staticmethod
     def extract_appointments(
-        image_path: Path,
-        roi: Optional[Tuple[int, int, int, int]] = None,
+        image_path: Path
     ) -> Tuple[List[RelativeAppointment], any]:
         appointments_ocr = ocr.OCR()
 
         pil_img, cv_img = image_utils.read_images(image_path)
         offset_x = offset_y = 0
-        if roi:
-            rx, ry, rw, rh = roi
+        if self._roi:
+            rx, ry, rw, rh = self._roi
             pil_img = pil_img.crop((rx, ry, rx + rw, ry + rh))
             cv_img = cv_img[ry: ry + rh, rx: rx + rw]
             offset_x, offset_y = rx, ry

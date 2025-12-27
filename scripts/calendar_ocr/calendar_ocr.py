@@ -46,13 +46,12 @@ class CalendarOCR:
         config = _load_config(config_path)
         self._roi = read_roi(config)
         self._time_config = config.get("time", {})
-        self._appointments_extractor = AppointmentsExtractor()
+        self._appointments_extractor = AppointmentsExtractor(self._roi)
         self._google_calendar = google_calendar
 
     def process_image(self, image_path: Path) -> List[RelativeAppointment]:
         ocr_appts = self._appointments_extractor.extract_appointments(
-            image_path,
-            roi=self._roi)
+            image_path)
 
         appts: List[Appointment] = []
         for appt in ocr_appts:

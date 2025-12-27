@@ -1,9 +1,9 @@
+import logging
 import datetime
 from pathlib import Path
 import json
 import math
-from typing import Tuple, List, Optional
-from dataclasses import dataclass
+from typing import Tuple, List
 from zoneinfo import ZoneInfo
 
 
@@ -141,7 +141,6 @@ class GoogleCalendar:
             end_dt = datetime.datetime.fromisoformat(end_str)
 
             # Extract bbox
-            bbox = (0, 0, 0, 0)
             try:
                 if 'description' in item:
                     data = json.loads(item['description'])
@@ -170,53 +169,23 @@ class GoogleCalendar:
                 calendarId=self._calendar_id,
                 eventId=google_event_id
             ).execute()
-            print(f"Deleted event: {google_event_id}")
+            logging.getLogger(__name__).info(
+                f"Deleted event: {google_event_id}")
         except Exception as e:
-            print(f"Error deleting event {google_event_id}: {e}")
+            logging.getLogger(__name__).exception(e)
 
     def delete_all_meetings_in_day(self, target_date: datetime.date):
         """Deletes all meetings found on a given day."""
         appointments = self.get_meetings_in_day(target_date)
 
         if not appointments:
-            print("No appointments found to delete.")
+            logging.getLogger(__name__).info(
+                "No appointments found to delete.")
             return
 
-        print(f"Deleting {len(appointments)} appointments...")
+        logging.getLogger(__name__).info(
+            f"Deleting {len(appointments)} appointments...")
         # Note: Google offers a batch API if performance becomes an issue for huge numbers
         for appt in appointments:
             if appt.google_event_id:
                 self.delete_appointment(appt.google_event_id)
-
-
-if __name__ == "__main__":
-    # Setup paths
-    # Or your specific calendar email/ID
-    CAL_ID = '933761ffc4a60226eff2909014f540d1c3d4aefa72497b9293c4ab3a975fbf3f@group.calendar.google.com'
-    TOKEN = 'token.json'
-    CREDS = 'credentials.json'
-
-    # Initialize
-    gcal = GoogleCalendar(CAL_ID, TOKEN, CREDS)
-
-    # 1. Create an appointment
-    now = datetime.datetime.now()
-    my_appt = Appointment(
-        title="Project Sync",
-        color=(255, 0, 0),  # Red (will map to Tomato/11)
-        bbox=(10, 10, 200, 100),
-        start_time=now,
-        duration=datetime.timedelta(hours=1)
-    )
-
-    # 2. Add to calendar
-    saved_appt = gcal.add_appointment(my_appt)
-    print(f"Added event with ID: {saved_appt.google_event_id}")
-
-    # 3. Get meetings for today
-    today_meetings = gcal.get_meetings_in_day(datetime.date.today())
-    print(f"Found {len(today_meetings)} meetings today.")
-    input("Press Enter to delete the created appointment...")
-
-    if saved_appt.google_event_id:
-        gcal.delete_appointment(saved_appt.google_event_id)

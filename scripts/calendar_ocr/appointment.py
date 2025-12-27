@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional
 from dataclasses import dataclass
 import datetime
 
@@ -7,8 +7,8 @@ import datetime
 class Appointment:
     title: str
     color: Tuple[int, int, int]  # RGB
-    start_time: datetime.datetime = None
-    duration: datetime.timedelta = None
+    start_time: datetime.datetime
+    duration: datetime.timedelta
     timezone: str = 'Asia/Jerusalem'  # Default time zone
     google_event_id: Optional[str] = None
 
