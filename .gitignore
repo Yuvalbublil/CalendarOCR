@@ -3,3 +3,5 @@
 *.jpg
 *.jpeg
 *pyc
+credentials.json
+token.json

@@ -5,7 +5,7 @@ import cv2
 from typing import Tuple, Optional, List
 from pathlib import Path
 
-from appointment import Appointment
+from appointment import RelativeAppointment
 import image_utils
 import ocr
 
@@ -23,6 +23,9 @@ STRIP_SIDE_PIXELS = 50
 
 class AppointmentsExtractor:
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def _dominant_color_near_line(cv_img, box) -> Tuple[int, int, int]:
         x, y, w, h = box
@@ -36,7 +39,7 @@ class AppointmentsExtractor:
 
     @staticmethod
     def _find_text_boxes(
-            cv_img, debug_dir: Optional[Path] = None) -> List[Tuple[int, int, int, int]]:
+            cv_img) -> List[Tuple[int, int, int, int]]:
         gray = cv2.cvtColor(cv_img, cv2.COLOR_RGB2GRAY)
         _, thresh_inv = cv2.threshold(
             gray, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV
@@ -69,12 +72,6 @@ class AppointmentsExtractor:
 
         logging.getLogger(__name__).info(f"Boxes before merge: {boxes}")
 
-        if debug_dir:
-            debug_dir.mkdir(parents=True, exist_ok=True)
-            cv2.imwrite(str(debug_dir / "gray.png"), gray)
-            cv2.imwrite(str(debug_dir / "thresh_inv.png"), thresh_inv)
-            cv2.imwrite(str(debug_dir / "thresh.png"), thresh)
-
         def iou(b1, b2):
             x1, y1, w1, h1 = b1
             x2, y2, w2, h2 = b2
@@ -96,13 +93,6 @@ class AppointmentsExtractor:
 
         merged.sort(key=lambda b: b[1])
 
-        if debug_dir:
-            overlay = cv_img.copy()
-            for (x, y, w, h) in merged:
-                cv2.rectangle(overlay, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.imwrite(str(debug_dir / "boxes_overlay.png"),
-                        cv2.cvtColor(overlay, cv2.COLOR_RGB2BGR))
-
         logging.getLogger(__name__).info(f"Boxes after merge: {merged}")
 
         return merged
@@ -113,7 +103,7 @@ class AppointmentsExtractor:
         verbose: bool = False,
         debug_dir: Optional[Path] = None,
         roi: Optional[Tuple[int, int, int, int]] = None,
-    ) -> Tuple[List[Appointment], any]:
+    ) -> Tuple[List[RelativeAppointment], any]:
         appointments_ocr = ocr.OCR()
 
         pil_img, cv_img = image_utils.read_images(image_path)
@@ -131,7 +121,7 @@ class AppointmentsExtractor:
 
         logging.getLogger(__name__).info(f"Detected boxes: {boxes}")
 
-        appointments: List[Appointment] = []
+        appointments: List[RelativeAppointment] = []
         for box in boxes:
             text = appointments_ocr.ocr_box(pil_img, box)
             if not text:
@@ -142,7 +132,7 @@ class AppointmentsExtractor:
             gx, gy, gw, gh = box[0] + offset_x, box[1] + \
                 offset_y, box[2], box[3]
             appointments.append(
-                Appointment(title=' '.join(text[::].split()),
-                            color=color, bbox=(gx, gy, gw, gh))
+                RelativeAppointment(title=' '.join(text[::].split()),
+                                    color=color, bbox=(gx, gy, gw, gh))
             )
         return appointments

@@ -4,14 +4,14 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 
-from appointment import Appointment
+from appointment import RelativeAppointment
 
 
 def round(value: float, round_base: int):
     return np.round(value/round_base) * round_base
 
 
-def add_time(roi_config: dict, time_config: dict, base_day: datetime.datetime, appt: Appointment):
+def add_time(roi_config: dict, time_config: dict, base_day: datetime.datetime, appt: RelativeAppointment):
     print(f"appt.bbox {appt.bbox}")
     start_y, block_size = appt.bbox[1], appt.bbox[3]
     start_y_in_roi = start_y - roi_config[1]

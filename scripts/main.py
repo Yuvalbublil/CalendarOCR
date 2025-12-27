@@ -1,6 +1,6 @@
 """
 Lightweight OCR pipeline for the provided calendar image format.
-Outputs Appointment objects with title, time, and dominant color swatch.
+Outputs RelativeAppointment objects with title, time, and dominant color swatch.
 Hebrew OCR via Tesseract (lang=heb).
 
 Requirements inside conda env `opencv_py310`:
@@ -27,7 +27,7 @@ import yaml
 
 import image_utils
 import draw_utils
-from appointment import Appointment
+from appointment import RelativeAppointment
 from appointments_extractor import AppointmentsExtractor
 
 

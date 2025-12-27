@@ -11,7 +11,7 @@ from font import get_font
 
 
 def draw_debug_image(
-    cv_img, appts: List["Appointment"], out_path: Path, offset: Tuple[int, int] = (0, 0)
+    cv_img, appts: List["RelativeAppointment"], out_path: Path, offset: Tuple[int, int] = (0, 0)
 ) -> Path:
     debug_img = cv_img.copy()
     ox, oy = offset
