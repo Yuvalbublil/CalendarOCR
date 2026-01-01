@@ -5,3 +5,4 @@
 *pyc
 credentials.json
 token.json
+*.egg-info/

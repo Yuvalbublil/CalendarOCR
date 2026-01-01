@@ -1,16 +1,15 @@
-import time_utils
 import logging
 import yaml
 
-from dataclasses import asdict
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from google_calendar import GoogleCalendar
-from appointment import RelativeAppointment, Appointment
-from appointments_extractor import AppointmentsExtractor
+from .google_calendar import GoogleCalendar
+from .appointment import Appointment
+from .appointments_extractor import AppointmentsExtractor
+from .processors import CalendarProcessor
 
-CONFIG_DEFAULT = {}
+CONFIG_DEFAULT: Dict[str, Any] = {}
 
 
 def _load_config(config_path: Optional[Path]) -> Dict[str, Any]:
@@ -28,7 +27,7 @@ def _load_config(config_path: Optional[Path]) -> Dict[str, Any]:
     return data
 
 
-def read_roi(config):
+def read_roi(config: Dict[str, Any]) -> Optional[tuple[int, int, int, int]]:
     roi = tuple(config.get("roi", [])) if isinstance(
         config.get("roi"), list) else None
 
@@ -38,32 +37,21 @@ def read_roi(config):
         raise ValueError(msg)
 
     roi_int = tuple(int(v) for v in roi) if roi else None
-    return roi_int
+    return roi_int  # type: ignore
 
 
 class CalendarOCR:
-    def __init__(self, config_path: Optional[Path] = None, google_calendar: GoogleCalendar = None):
+    def __init__(self, config_path: Optional[Path] = None, google_calendar: Optional[GoogleCalendar] = None):
         config = _load_config(config_path)
         self._roi = read_roi(config)
         self._time_config = config.get("time", {})
         self._appointments_extractor = AppointmentsExtractor(self._roi)
-        self._google_calendar = google_calendar
+        self._processor = CalendarProcessor(
+            self._roi,
+            self._time_config,
+            self._appointments_extractor,
+            google_calendar
+        )
 
-    def process_image(self, image_path: Path) -> List[RelativeAppointment]:
-        ocr_appts = self._appointments_extractor.extract_appointments(
-            image_path)
-
-        appts: List[Appointment] = []
-        for appt in ocr_appts:
-            appts.append(time_utils.add_time(
-                self._roi, self._time_config, time_utils.get_today_datetime(), appt))  # TODO change today to the correct day
-
-        for appt in appts:
-            logging.getLogger(__name__).debug(
-                asdict(appt) | {"color_hex": appt.to_hex()})
-
-        if self._google_calendar:
-            for appt in appts:
-                self._google_calendar.add_appointment(appt)
-
-        return appts
+    def process_image(self, image_path: Path) -> List[Appointment]:
+        return self._processor.process(image_path)

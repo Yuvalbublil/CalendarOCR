@@ -4,21 +4,21 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 
-from appointment import RelativeAppointment, Appointment
+from .appointment import RelativeAppointment, Appointment
 
 MINUTES_PER_HOUR = 60
 
 
-def round(value: float, round_base: int):
+def round(value: float, round_base: float):
     return np.round(value/round_base) * round_base
 
 
-def add_time(roi_config: dict, time_config: dict, base_day: datetime.datetime, appt: RelativeAppointment) -> Appointment:
+def add_time(roi_config: tuple | None, time_config: dict, base_day: datetime.datetime, appt: RelativeAppointment) -> Appointment:
     MINUTES_TO_ROUND = 5
 
     logging.getLogger(__name__).debug(f"appt.bbox {appt.bbox}")
     start_y, block_size = appt.bbox[1], appt.bbox[3]
-    start_y_in_roi = start_y - roi_config[1]
+    start_y_in_roi = start_y - (roi_config[1] if roi_config else 0)
     start_time_hour = start_y_in_roi / \
         time_config["hour_size"] + time_config["base_hour"]
 

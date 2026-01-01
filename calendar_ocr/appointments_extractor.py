@@ -2,12 +2,12 @@
 import logging
 import cv2
 
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Dict
 from pathlib import Path
 
-from appointment import RelativeAppointment
-import image_utils
-import ocr
+from .appointment import RelativeAppointment
+from . import image_utils
+from . import ocr
 
 MAX_BOX_AREA = 400*400
 
@@ -31,7 +31,7 @@ class AppointmentsExtractor:
         x, y, w, h = box
         strip = cv_img[y: y + h, max(0, x - STRIP_SIDE_PIXELS): x + min(STRIP_SIDE_PIXELS, w)]
         pixels = strip.reshape(-1, 3)
-        counts = {}
+        counts: Dict[Tuple[int, int, int], int] = {}
         for r, g, b in pixels:
             key = (int(r), int(g), int(b))
             counts[key] = counts.get(key, 0) + 1
@@ -97,10 +97,9 @@ class AppointmentsExtractor:
 
         return merged
 
-    @staticmethod
     def extract_appointments(
-        image_path: Path
-    ) -> Tuple[List[RelativeAppointment], any]:
+        self, image_path: Path
+    ) -> List[RelativeAppointment]:
         appointments_ocr = ocr.OCR()
 
         pil_img, cv_img = image_utils.read_images(image_path)

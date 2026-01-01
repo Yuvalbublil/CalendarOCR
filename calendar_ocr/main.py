@@ -1,6 +1,6 @@
 """
 Lightweight OCR pipeline for the provided calendar image format.
-Outputs RelativeAppointment objects with title, time, and dominant color swatch.
+Outputs Appointment objects with title, time, and dominant color swatch.
 Hebrew OCR via Tesseract (lang=heb).
 
 Requirements inside conda env `opencv_py310`:
@@ -16,8 +16,8 @@ import datetime
 
 from pathlib import Path
 
-from google_calendar import GoogleCalendar
-from calendar_ocr import CalendarOCR
+from .google_calendar import GoogleCalendar
+from .calendar_ocr import CalendarOCR
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,7 +26,7 @@ logging.basicConfig(
 )
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="OCR calendar appointments (Hebrew)"
     )
@@ -43,6 +43,9 @@ def get_args():
         action="store_true",
         help="Save debug image with bounding boxes and text overlay",
     )
+    parser.add_argument("-d", "--delete-after", action="store_true",
+                        help="Delete all existing appointments for today before adding new ones",
+                        )
     return parser.parse_args()
 
 
@@ -68,9 +71,11 @@ def main() -> None:
     appointments = calendar_ocr.process_image(image_path)
 
     print(f"Extracted {len(appointments)} appointments.")
-
-    print(GoogleCalendar(CAL_ID, TOKEN, CREDS).delete_all_meetings_in_day(
-        datetime.date.today()))
+    if args.delete_after:
+        input(
+            "Press Enter to delete all existing appointments for today...")
+        print(GoogleCalendar(CAL_ID, TOKEN, CREDS).delete_all_meetings_in_day(
+            datetime.date.today()))
 
 
 if __name__ == "__main__":

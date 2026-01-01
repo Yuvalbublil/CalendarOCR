@@ -7,11 +7,12 @@ from PIL import Image, ImageDraw
 from typing import List, Tuple
 from pathlib import Path
 
-from font import get_font
+from .font import get_font
+from .appointment import RelativeAppointment
 
 
 def draw_debug_image(
-    cv_img, appts: List["RelativeAppointment"], out_path: Path, offset: Tuple[int, int] = (0, 0)
+    cv_img, appts: List[RelativeAppointment], out_path: Path, offset: Tuple[int, int] = (0, 0)
 ) -> Path:
     debug_img = cv_img.copy()
     ox, oy = offset

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calendar-ocr"
+version = "0.1.0"
+description = "OCR pipeline for calendar images with Google Calendar integration"
+authors = [{name = "Yuval Bublil"}]
+dependencies = [
+    "pillow",
+    "python-bidi",
+    "arabic-reshaper",
+    "pyyaml",
+    "pytesseract",
+    "opencv-python",
+    "google-api-python-client",
+    "google-auth-oauthlib",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "pytest",
+    "black",
+    "flake8",
+]
+
+[project.scripts]
+calendar-ocr = "calendar_ocr.main:main"
+
+[tool.setuptools.packages.find]
+exclude = ["helpers", "photo_calender_debug_artifacts", "scripts"]
