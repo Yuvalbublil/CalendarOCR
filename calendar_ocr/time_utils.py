@@ -4,7 +4,8 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 
-from .appointment import RelativeAppointment, Appointment
+from .appointments.relative_appointment import RelativeAppointment
+from .appointments.appointment import Appointment
 
 MINUTES_PER_HOUR = 60
 

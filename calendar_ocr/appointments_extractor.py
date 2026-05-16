@@ -5,7 +5,7 @@ import cv2
 from typing import Tuple, Optional, List, Dict
 from pathlib import Path
 
-from .appointment import RelativeAppointment
+from .appointments.relative_appointment import RelativeAppointment
 from . import image_utils
 from . import ocr
 

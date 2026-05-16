@@ -1,0 +1,19 @@
+name: calender-ocr
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.14
+  - pillow
+  - tesseract
+  - pyyaml
+  - pytesseract
+  - pip
+  - pip:
+    - python-bidi
+    - arabic-reshaper
+    - google
+    - google-api-python-client
+    - google-auth-httplib2
+    - google-auth-oauthlib
+    - opencv-python-headless

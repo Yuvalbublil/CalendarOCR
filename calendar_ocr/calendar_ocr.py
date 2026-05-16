@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 
 from .google_calendar import GoogleCalendar
-from .appointment import Appointment
+from .appointments.appointment import Appointment
 from .appointments_extractor import AppointmentsExtractor
 from .processors import CalendarProcessor
 

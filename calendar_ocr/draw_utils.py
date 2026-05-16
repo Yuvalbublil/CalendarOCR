@@ -8,7 +8,7 @@ from typing import List, Tuple
 from pathlib import Path
 
 from .font import get_font
-from .appointment import RelativeAppointment
+from .appointments.relative_appointment import RelativeAppointment
 
 
 def draw_debug_image(

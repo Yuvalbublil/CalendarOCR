@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 
 from .base import AppointmentProcessor
-from ..appointment import Appointment
+from ..appointments.appointment import Appointment
 from ..appointments_extractor import AppointmentsExtractor
 from ..google_calendar import GoogleCalendar
 from .. import time_utils
