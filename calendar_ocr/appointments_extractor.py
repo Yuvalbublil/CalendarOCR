@@ -6,8 +6,8 @@ from typing import Tuple, Optional, List, Dict
 from pathlib import Path
 
 from .appointments.relative_appointment import RelativeAppointment
+from .ocr_backends.base import BaseOCR
 from . import image_utils
-from . import ocr
 
 MAX_BOX_AREA = 400*400
 
@@ -23,8 +23,9 @@ STRIP_SIDE_PIXELS = 50
 
 class AppointmentsExtractor:
 
-    def __init__(self, roi: Optional[Tuple[int, int, int, int]] = None):
+    def __init__(self, roi: Optional[Tuple[int, int, int, int]], ocr: BaseOCR):
         self._roi = roi
+        self._ocr = ocr
 
     @staticmethod
     def _dominant_color_near_line(cv_img, box) -> Tuple[int, int, int]:
@@ -100,8 +101,6 @@ class AppointmentsExtractor:
     def extract_appointments(
         self, image_path: Path
     ) -> List[RelativeAppointment]:
-        appointments_ocr = ocr.OCR()
-
         pil_img, cv_img = image_utils.read_images(image_path)
         offset_x = offset_y = 0
         if self._roi:
@@ -116,7 +115,7 @@ class AppointmentsExtractor:
 
         appointments: List[RelativeAppointment] = []
         for box in boxes:
-            text = appointments_ocr.ocr_box(pil_img, box)
+            text = self._ocr.ocr_box(pil_img, box)
             if not text:
                 text = "unrecognized"
 

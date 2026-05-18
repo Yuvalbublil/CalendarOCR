@@ -7,6 +7,7 @@ from typing import Optional, List, Dict, Any
 from .google_calendar import GoogleCalendar
 from .appointments.appointment import Appointment
 from .appointments_extractor import AppointmentsExtractor
+from .ocr_backends import create_ocr
 from .processors import CalendarProcessor
 
 CONFIG_DEFAULT: Dict[str, Any] = {}
@@ -45,7 +46,8 @@ class CalendarOCR:
         config = _load_config(config_path)
         self._roi = read_roi(config)
         self._time_config = config.get("time", {})
-        self._appointments_extractor = AppointmentsExtractor(self._roi)
+        ocr_backend = create_ocr(config)
+        self._appointments_extractor = AppointmentsExtractor(self._roi, ocr_backend)
         self._processor = CalendarProcessor(
             self._roi,
             self._time_config,

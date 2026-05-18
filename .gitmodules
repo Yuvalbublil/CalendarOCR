@@ -1,3 +1,0 @@
-[submodule "external/paddle_onnx"]
-	path = external/paddle_onnx
-	url = git@github.com:saikanov/paddle_onnx.git
