@@ -32,3 +32,10 @@ calendar-ocr = "calendar_ocr.main:main"
 
 [tool.setuptools.packages.find]
 exclude = ["helpers", "photo_calender_debug_artifacts", "scripts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: tests that read real images from disk",
+    "tesseract: tests that require system Tesseract + heb.traineddata",
+]
